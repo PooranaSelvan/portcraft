@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Create Your Portfolio</h2>
+<div id="portfolio-editor">
+    <div class="draggable" draggable="true">
+        <h3>Header</h3>
+        <p>Drag me to reposition</p>
+    </div>
+    <div class="draggable" draggable="true">
+        <h3>About Me</h3>
+        <p>Drag me to reposition</p>
+    </div>
+    <div class="draggable" draggable="true">
+        <h3>Projects</h3>
+        <p>Drag me to reposition</p>
+    </div>
+    <div class="draggable" draggable="true">
+        <h3>Contact</h3>
+        <p>Drag me to reposition</p>
+    </div>
+</div>
+<button id="save-portfolio" class="btn">Save Portfolio</button>
+<button id="preview-portfolio" class="btn">Preview</button>
+<div id="preview-container" style="display: none;"></div>
+{% endblock %}
