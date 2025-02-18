@@ -26,10 +26,4 @@ $(document).ready(() => {
     })
   })
 
-  // Preview portfolio
-  $("#preview-portfolio").click(() => {
-    var portfolioContent = $("#portfolio-editor").html()
-    $("#preview-container").html(portfolioContent).toggle()
-  })
-})
 

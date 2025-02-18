@@ -1,25 +1,86 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Create Your Portfolio</h2>
-<div id="portfolio-editor">
-    <div class="draggable" draggable="true">
-        <h3>Header</h3>
-        <p>Drag me to reposition</p>
-    </div>
-    <div class="draggable" draggable="true">
-        <h3>About Me</h3>
-        <p>Drag me to reposition</p>
-    </div>
-    <div class="draggable" draggable="true">
-        <h3>Projects</h3>
-        <p>Drag me to reposition</p>
-    </div>
-    <div class="draggable" draggable="true">
-        <h3>Contact</h3>
-        <p>Drag me to reposition</p>
-    </div>
+<form id="portfolio-form">
+    <label for="name">Full Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="about">About Me:</label>
+    <textarea id="about" name="about" required></textarea>
+
+    <label for="skills">Skills (comma separated):</label>
+    <input type="text" id="skills" name="skills" required>
+
+    <label for="work">Work Experience:</label>
+    <textarea id="work" name="work" required></textarea>
+
+    <label for="projects">Projects:</label>
+    <textarea id="projects" name="projects" required></textarea>
+
+    <label for="contact">Contact Information:</label>
+    <input type="text" id="contact" name="contact" required>
+
+    <button type="button" id="preview-portfolio" class="btn">Preview</button>
+    <button type="submit" id="save-portfolio" class="btn">Save Portfolio</button>
+</form>
+
+<div id="preview-container" style="display: none; margin-top: 20px; border: 1px solid #ccc; padding: 15px;">
+    <h2>Portfolio Preview</h2>
+    <div id="preview-content"></div>
 </div>
-<button id="save-portfolio" class="btn">Save Portfolio</button>
-<button id="preview-portfolio" class="btn">Preview</button>
-<div id="preview-container" style="display: none;"></div>
+
+<script>
+document.getElementById('preview-portfolio').addEventListener('click', function() {
+    const name = document.getElementById('name').value.trim();
+    const about = document.getElementById('about').value.trim();
+    const skills = document.getElementById('skills').value.trim().split(',').map(s => s.trim()).join(', ');
+    const work = document.getElementById('work').value.trim();
+    const projects = document.getElementById('projects').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+
+    if (!name || !about || !skills || !work || !projects || !contact) {
+        alert('Please fill out all fields before previewing.');
+        return;
+    }
+
+    document.getElementById('preview-content').innerHTML = `
+        <h2>${name}</h2>
+        <h3>About Me</h3>
+        <p>${about}</p>
+        <h3>Skills</h3>
+        <p>${skills}</p>
+        <h3>Work Experience</h3>
+        <p>${work}</p>
+        <h3>Projects</h3>
+        <p>${projects}</p>
+        <h3>Contact</h3>
+        <p>${contact}</p>
+    `;
+    document.getElementById('preview-container').style.display = 'block';
+});
+
+// Save Portfolio Function
+document.getElementById('portfolio-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const portfolioData = {
+        name: document.getElementById('name').value.trim(),
+        about: document.getElementById('about').value.trim(),
+        skills: document.getElementById('skills').value.trim(),
+        work: document.getElementById('work').value.trim(),
+        projects: document.getElementById('projects').value.trim(),
+        contact: document.getElementById('contact').value.trim()
+    };
+
+    fetch('/save-portfolio', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(portfolioData)
+    }).then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert('Portfolio saved successfully!');
+          }
+      });
+});
+</script>
 {% endblock %}
