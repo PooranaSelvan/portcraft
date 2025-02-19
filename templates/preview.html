@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Portfolio Preview</h2>
+
+<div>
+    <h2>{{ portfolio.name }}</h2>
+    {% if portfolio.photo %}
+        <img src="{{ portfolio.photo }}" alt="Profile Photo" style="max-width: 200px;">
+    {% endif %}
+
+    <h3>About Me</h3>
+    <p>{{ portfolio.about }}</p>
+
+    <h3>Skills</h3>
+    <p>{{ portfolio.skills }}</p>
+
+    <h3>Work Experience</h3>
+    <p>{{ portfolio.work }}</p>
+
+    <h3>Projects</h3>
+    <p>{{ portfolio.projects }}</p>
+
+    <h3>Contact</h3>
+    <p>{{ portfolio.contact }}</p>
+
+    <h3>Social Media</h3>
+    <p>{{ portfolio.social_links }}</p>
+
+    <a href="{{ url_for('create_portfolio') }}" class="btn">Edit Portfolio</a>
+</div>
+{% endblock %}

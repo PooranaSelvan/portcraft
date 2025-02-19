@@ -1,0 +1,29 @@
+router.post("/", protect, async (req, res) => {
+    try {
+        const { name, description, brand, category, price, countInStock, rating, numReviews } = req.body;
+
+        // Check if user is a seller
+        if (!req.user.isSeller) {
+            return res.status(403).json({ message: "Only sellers can create products." });
+        }
+
+        // Create new product
+        const product = new Product({
+            name,
+            description,
+            brand,
+            category,
+            price,
+            countInStock,
+            rating,
+            numReviews,
+            user: req.user._id, // Assuming products belong to a seller
+        });
+
+        const createdProduct = await product.save();
+        res.status(201).json(createdProduct);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});

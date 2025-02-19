@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Portfolio</title>
+</head>
+<body>
+    <h1>Edit Portfolio</h1>
+    <form id="editPortfolioForm">
+        <label>Name:</label>
+        <input type="text" id="name" value="{{ portfolio.content.name }}">
+
+        <label>About:</label>
+        <textarea id="about">{{ portfolio.content.about }}</textarea>
+
+        <label>Projects:</label>
+        <textarea id="projects">{{ portfolio.content.projects }}</textarea>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script>
+        document.getElementById('editPortfolioForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const updatedData = {
+                name: document.getElementById('name').value,
+                about: document.getElementById('about').value,
+                projects: document.getElementById('projects').value
+            };
+
+            fetch("{{ url_for('edit_portfolio', portfolio_id=portfolio._id) }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
