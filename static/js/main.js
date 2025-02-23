@@ -136,4 +136,51 @@ function generatePreviewHTML(data) {
         </html>
     `;
 }
+document.getElementById('preview-portfolio').addEventListener('click', function() {
+    const portfolioData = {
+        name: document.getElementById('name').value.trim(),
+        about: document.getElementById('about').value.trim(),
+        skills: document.getElementById('skills').value.trim(),
+        work: document.getElementById('work').value.trim(),
+        projects: document.getElementById('projects').value.trim(),
+        contact: document.getElementById('contact').value.trim(),
+        social_links: document.getElementById('social-links').value.trim().split(',')
+    };
+
+    // Save data to localStorage to retrieve on the preview page
+    localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+
+    // Redirect to the preview page
+    window.location.href = '/preview-portfolio';
+});
+
+
+    const photoInput = document.getElementById('photo');
+    if (photoInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            portfolioData.photo = event.target.result;
+            fetchPreview(portfolioData);
+        };
+        reader.readAsDataURL(photoInput.files[0]);
+    } else {
+        fetchPreview(portfolioData);
+    }
+});
+
+function fetchPreview(portfolioData) {
+    fetch('/preview-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(portfolioData)
+    })
+    .then(response => response.text())
+    .then(html => {
+        const newTab = window.open();
+        newTab.document.open();
+        newTab.document.write(html);
+        newTab.document.close();
+    })
+    .catch(error => console.error('Error:', error));
+}
 

@@ -1,20 +1,20 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from bson.objectid import ObjectId
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.secret_key = os.urandom(24)
 app.config["MONGO_URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
 mongo = PyMongo(app)
 
-
+# Home Route
 @app.route('/')
 def home():
     return render_template('home.html')
 
-
+# Login Route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -26,7 +26,7 @@ def login():
         flash('Invalid username or password', 'error')
     return render_template('login.html')
 
-
+# Registration Route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -39,14 +39,14 @@ def register():
         flash('Username already exists', 'error')
     return render_template('register.html')
 
-
+# Logout Route
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     flash('Logged out successfully!', 'success')
     return redirect(url_for('home'))
 
-
+# User Profile Route
 @app.route('/profile')
 def profile():
     if 'user_id' not in session:
@@ -54,30 +54,36 @@ def profile():
     user = mongo.db.users.find_one({'_id': ObjectId(session['user_id'])})
     return render_template('profile.html', user=user)
 
-
-@app.route('/create-portfolio')
+# Create Portfolio Route
+@app.route('/create-portfolio', methods=['GET', 'POST'])
 def create_portfolio():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        portfolio_data = {
+            'name': request.form['name'],
+            'about': request.form['about'],
+            'skills': request.form['skills'],
+            'work': request.form['work'],
+            'projects': request.form['projects'],
+            'contact': request.form['contact'],
+            'social_links': request.form['social_links'].split(',')
+        }
+
+        user_id = ObjectId(session['user_id'])
+
+        mongo.db.portfolios.insert_one({
+            'user_id': user_id,
+            'content': portfolio_data
+        })
+
+        flash('Portfolio created successfully!', 'success')
+        return redirect(url_for('my_portfolios'))
+
     return render_template('create_portfolio.html')
 
-
-@app.route('/save-portfolio', methods=['POST'])
-def save_portfolio():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    portfolio_data = request.json
-    user_id = ObjectId(session['user_id'])
-
-    portfolio_id = mongo.db.portfolios.insert_one({
-        'user_id': user_id,
-        'content': portfolio_data
-    }).inserted_id
-
-    return {'success': True, 'portfolio_id': str(portfolio_id)}
-
-
+# View Portfolio Route
 @app.route('/portfolio/<username>/<portfolio_id>')
 def view_portfolio(username, portfolio_id):
     portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
@@ -85,16 +91,24 @@ def view_portfolio(username, portfolio_id):
         return render_template('view_portfolio.html', portfolio=portfolio)
     return "Portfolio not found", 404
 
+# Preview Portfolio Route
+@app.route('/preview', methods=['POST'])
+def preview():
+    portfolio_data = {
+        'name': request.form.get('name', 'Not provided'),
+        'about': request.form.get('about', 'Not provided'),
+        'skills': request.form.get('skills', 'Not provided'),
+        'contact': request.form.get('contact', 'Not provided'),
+        'projects': request.form.getlist('projects'),  # Make sure this is a list
+        'social_links': request.form.getlist('social_links')  # Make sure this is a list
+    }
+    return render_template('preview.html', portfolio_data=portfolio_data)
 
-@app.route('/preview-portfolio', methods=['POST'])
-def preview_portfolio():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    portfolio_data = request.json
-    return render_template('preview.html', portfolio=portfolio_data)
 
 
+
+
+# My Portfolios Route
 @app.route('/my-portfolios')
 def my_portfolios():
     if 'user_id' not in session:
@@ -105,23 +119,7 @@ def my_portfolios():
 
     return render_template('my_portfolios.html', portfolios=portfolios)
 
-@app.route('/save-portfolio', methods=['POST'])
-def save_portfolio():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    portfolio_data = request.json
-    user_id = ObjectId(session['user_id'])
-
-    portfolio_id = mongo.db.portfolios.insert_one({
-        'user_id': user_id,
-        'content': portfolio_data
-    }).inserted_id
-
-    # Redirecting to "My Portfolios" page after saving
-    return {'success': True, 'redirect_url': url_for('my_portfolios')}
-
-
+# Edit Portfolio Route
 @app.route('/edit-portfolio/<portfolio_id>', methods=['GET', 'POST'])
 def edit_portfolio(portfolio_id):
     if 'user_id' not in session:
@@ -130,11 +128,21 @@ def edit_portfolio(portfolio_id):
     portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
 
     if request.method == 'POST':
-        updated_data = request.json
+        updated_data = {
+            'name': request.form['name'],
+            'about': request.form['about'],
+            'skills': request.form['skills'],
+            'work': request.form['work'],
+            'projects': request.form['projects'],
+            'contact': request.form['contact'],
+            'social_links': request.form['social_links'].split(',')
+        }
+
         mongo.db.portfolios.update_one({'_id': ObjectId(portfolio_id)}, {'$set': {'content': updated_data}})
-        return {'success': True, 'redirect_url': url_for('my_portfolios')}
+        flash('Portfolio updated successfully!', 'success')
+        return redirect(url_for('my_portfolios'))
 
     return render_template('edit_portfolio.html', portfolio=portfolio)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)

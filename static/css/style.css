@@ -176,3 +176,47 @@ h2 {
     margin-bottom: 15px;
 }
 
+.preview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.preview-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.preview-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #f9f9f9;
+}
+
+.preview-section h2 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.preview-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.preview-section ul li {
+    margin-bottom: 5px;
+}
+
+.preview-section ul li a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.preview-section ul li a:hover {
+    text-decoration: underline;
+}

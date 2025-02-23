@@ -1,31 +1,112 @@
-{% extends "base.html" %}
-{% block content %}
-<h2>Portfolio Preview</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Preview</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+        }
+        .sidebar {
+            width: 200px;
+            background: #f4f4f9;
+            padding: 20px;
+            height: 100vh;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px 0;
+        }
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+        .sidebar ul li a:hover {
+            color: #007BFF;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            margin-left: 250px;
+        }
+        .content section {
+            display: none;
+        }
+        .content section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a onclick="showSection('about')">About</a></li>
+            <li><a onclick="showSection('projects')">Projects</a></li>
+            <li><a onclick="showSection('social')">Social Media Links</a></li>
+        </ul>
+    </div>
 
-<div>
-    <h2>{{ portfolio.name }}</h2>
-    {% if portfolio.photo %}
-        <img src="{{ portfolio.photo }}" alt="Profile Photo" style="max-width: 200px;">
-    {% endif %}
+    <div class="content">
+        <!-- About Section -->
+        <section id="about" class="active">
+            <h2>About Me</h2>
+            <p><strong>Name:</strong> {{ portfolio_data.get('name', 'Not provided') }}</p>
+            <p><strong>About:</strong> {{ portfolio_data.get('about', 'Not provided') }}</p>
+            <p><strong>Skills:</strong> {{ portfolio_data.get('skills', 'Not provided') }}</p>
+            <p><strong>Contact:</strong> {{ portfolio_data.get('contact', 'Not provided') }}</p>
+        </section>
 
-    <h3>About Me</h3>
-    <p>{{ portfolio.about }}</p>
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2>Projects</h2>
+            {% set projects = portfolio_data.get('projects', []) %}
+            {% if projects %}
+                <ul>
+                    {% for project in projects %}
+                    <li><a href="{{ project }}" target="_blank">{{ project }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No projects available.</p>
+            {% endif %}
+        </section>
 
-    <h3>Skills</h3>
-    <p>{{ portfolio.skills }}</p>
+        <!-- Social Media Section -->
+        <section id="social">
+            <h2>Social Media Links</h2>
+            {% set social_links = portfolio_data.get('social_links', []) %}
+            {% if social_links %}
+                <ul>
+                    {% for link in social_links %}
+                    <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No social media links available.</p>
+            {% endif %}
+        </section>
+    </div>
 
-    <h3>Work Experience</h3>
-    <p>{{ portfolio.work }}</p>
+    <script>
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content section').forEach(s => s.classList.remove('active'));
+            // Show the selected section
+            document.getElementById(section).classList.add('active');
+        }
 
-    <h3>Projects</h3>
-    <p>{{ portfolio.projects }}</p>
-
-    <h3>Contact</h3>
-    <p>{{ portfolio.contact }}</p>
-
-    <h3>Social Media</h3>
-    <p>{{ portfolio.social_links }}</p>
-
-    <a href="{{ url_for('create_portfolio') }}" class="btn">Edit Portfolio</a>
-</div>
-{% endblock %}
+        // Default to showing the About section
+        showSection('about');
+    </script>
+</body>
+</html>
