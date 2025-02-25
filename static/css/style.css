@@ -15,12 +15,13 @@ body {
 /* Layout */
 .container {
   display: flex;
-  min-height: 100vh;
+  height: auto; /* Changed from min-height: 100vh; */
 }
 
 main {
   flex: 1;
   padding: 20px;
+  margin-left: 200px; /* Add margin to prevent content overlap */
 }
 
 /* Sidebar */
@@ -29,6 +30,9 @@ main {
   background: #f4f4f4;
   padding: 20px;
   border-radius: 10px;
+  overflow-y: auto; /* Added to handle overflow */
+  height: 100vh; /* Ensure it takes full viewport height */
+  position: fixed; /* Make it fixed to the left */
 }
 
 .sidebar ul {

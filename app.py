@@ -114,7 +114,8 @@ def save_portfolio():
         'social_links': social_links,
         'user_id': session['user_id']  # Save by user ID for authentication
     }
-    db.portfolios.insert_one(portfolio_data)
+    mongo.db.portfolios.insert_one(portfolio_data)
+
 
     flash('Portfolio saved successfully!', 'success')
     return redirect(url_for('my_portfolios'))

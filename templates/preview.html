@@ -45,6 +45,22 @@
         .content section.active {
             display: block;
         }
+        .save-button {
+    display: inline-block;
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-button:hover {
+    background-color: #0056b3;
+}
+
     </style>
 </head>
 <body>
@@ -65,7 +81,10 @@
             <p><strong>Skills:</strong> {{ portfolio_data.get('skills', 'Not provided') }}</p>
             <p><strong>Contact:</strong> {{ portfolio_data.get('contact', 'Not provided') }}</p>
         </section>
-
+        <!-- Save Button -->
+        <div style="text-align: right; margin-top: 20px;">
+            <button class="save-button" onclick="savePortfolio()">Save</button>
+        </div>
         <!-- Projects Section -->
         <section id="projects">
             <h2>Projects</h2>

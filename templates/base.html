@@ -10,6 +10,50 @@
     <!-- jQuery and jQuery UI for interactivity (e.g., drag and drop) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        /* Sidebar Styling */
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+        .sidebar .nav-link.active {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        /* Main Content Adjustment */
+        main {
+            margin-left: 18%;
+        }
+        /* Responsive Adjustment */
+        @media (max-width: 992px) {
+            .sidebar {
+                display: none;
+            }
+            main {
+                margin-left: 0;
+            }
+        }
+        .flash-messages {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1050;
+            animation: slide-in 0.5s ease;
+        }
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -19,27 +63,35 @@
                 <nav>
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+                                Home
+                            </a>
                         </li>
                         {% if 'user_id' in session %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('create_portfolio') }}">Create Portfolio</a>
+                                <a class="nav-link {% if request.endpoint == 'create_portfolio' %}active{% endif %}" href="{{ url_for('create_portfolio') }}">
+                                    Create Portfolio
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('my_portfolios') }}">My Portfolios</a>
+                                <a class="nav-link {% if request.endpoint == 'my_portfolios' %}active{% endif %}" href="{{ url_for('my_portfolios') }}">
+                                    My Portfolios
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                                <a class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">
+                                    Profile
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-danger" href="{{ url_for('logout') }}">Logout</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                                <a class="nav-link {% if request.endpoint == 'login' %}active{% endif %}" href="{{ url_for('login') }}">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                                <a class="nav-link {% if request.endpoint == 'register' %}active{% endif %}" href="{{ url_for('register') }}">Register</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -49,18 +101,18 @@
             <!-- Main Content Area -->
             <main class="col-md-9 col-lg-10 py-4">
                 <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="container">
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
                             {% for category, message in messages %}
                                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                                     {{ message }}
                                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
                 <!-- Dynamic Content -->
                 {% block content %}{% endblock %}
             </main>

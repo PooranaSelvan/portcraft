@@ -184,3 +184,19 @@ function fetchPreview(portfolioData) {
     .catch(error => console.error('Error:', error));
 }
 
+document.querySelector('form').addEventListener('submit', function(event) {
+    const requiredFields = ['name', 'about', 'skills', 'work', 'projects', 'contact'];
+    let allFilled = true;
+
+    requiredFields.forEach(field => {
+        const value = document.getElementById(field).value.trim();
+        if (value === '') {
+            allFilled = false;
+            alert(`${field} is required!`);
+        }
+    });
+
+    if (!allFilled) {
+        event.preventDefault();  // Prevent form submission
+    }
+});
