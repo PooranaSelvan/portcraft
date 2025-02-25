@@ -4,18 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .create-button {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 30px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+        .create-button:hover {
+            background: #2980b9;
+        }
+        .portfolio-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .portfolio-card {
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .portfolio-card:hover {
+            transform: scale(1.03);
+        }
+        .portfolio-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .portfolio-content {
+            padding: 15px;
+        }
+        .portfolio-title {
+            font-size: 20px;
+            margin: 0;
+            color: #333;
+        }
+        .portfolio-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .portfolio-actions a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .portfolio-actions a:hover {
+            color: #2980b9;
+        }
+        .delete-btn {
+            color: #e74c3c;
+        }
+        .delete-btn:hover {
+            color: #c0392b;
+        }
+    </style>
 </head>
 <body>
-    <h1>My Portfolios</h1>
-    <a href="{{ url_for('create_portfolio') }}">Create New Portfolio</a>
-    <ul>
-        {% for portfolio in portfolios %}
-            <li>
-                <strong>{{ portfolio.content.name }}</strong>
-                <a href="{{ url_for('view_portfolio', username='myusername', portfolio_id=portfolio._id) }}">Preview</a> |
-                <a href="{{ url_for('edit_portfolio', portfolio_id=portfolio._id) }}">Edit</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1>My Portfolios</h1>
+        <a class="create-button" href="{{ url_for('create_portfolio') }}">Create New Portfolio</a>
+        <div class="portfolio-list">
+            {% for portfolio in portfolios %}
+                <div class="portfolio-card">
+                    <img src="{{ portfolio.content.profile_photo or 'https://via.placeholder.com/300x200.png?text=No+Image' }}" alt="{{ portfolio.content.name }}">
+                    <div class="portfolio-content">
+                        <h3 class="portfolio-title">{{ portfolio.content.name }}</h3>
+                        <div class="portfolio-actions">
+                            <a href="{{ url_for('view_portfolio', username='myusername', portfolio_id=portfolio._id) }}">Preview</a>
+                            <a href="{{ url_for('edit_portfolio', portfolio_id=portfolio._id) }}">Edit</a>
+                            <a class="delete-btn" href="{{ url_for('delete_portfolio', portfolio_id=portfolio._id) }}">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>

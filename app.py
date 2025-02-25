@@ -91,6 +91,49 @@ def view_portfolio(username, portfolio_id):
         return render_template('view_portfolio.html', portfolio=portfolio)
     return "Portfolio not found", 404
 
+
+@app.route('/save_portfolio', methods=['POST'])
+def save_portfolio():
+    # Extract form data
+    name = request.form.get('name')
+    about = request.form.get('about')
+    skills = request.form.get('skills').split(',')
+    work = request.form.get('work')
+    projects = request.form.get('projects').split(',')
+    contact = request.form.get('contact')
+    social_links = request.form.get('social_links').split(',')
+
+    # Save data to MongoDB
+    portfolio_data = {
+        'name': name,
+        'about': about,
+        'skills': skills,
+        'work': work,
+        'projects': projects,
+        'contact': contact,
+        'social_links': social_links,
+        'user_id': session['user_id']  # Save by user ID for authentication
+    }
+    db.portfolios.insert_one(portfolio_data)
+
+    flash('Portfolio saved successfully!', 'success')
+    return redirect(url_for('my_portfolios'))
+
+
+# Delete Portfolio Route
+@app.route('/delete_portfolio/<portfolio_id>', methods=['GET', 'POST'])
+def delete_portfolio(portfolio_id):
+    # Check if the portfolio exists
+    portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
+    if portfolio:
+        mongo.db.portfolios.delete_one({'_id': ObjectId(portfolio_id)})
+        print(f"Deleted portfolio with ID: {portfolio_id}")
+        flash('Portfolio deleted successfully!', 'success')
+    else:
+        print(f"No portfolio found with ID: {portfolio_id}")
+        flash('Portfolio not found.', 'error')
+    return redirect(url_for('my_portfolios'))
+
 # Preview Portfolio Route
 @app.route('/preview', methods=['POST'])
 def preview():
@@ -103,10 +146,6 @@ def preview():
         'social_links': request.form.getlist('social_links')  # Make sure this is a list
     }
     return render_template('preview.html', portfolio_data=portfolio_data)
-
-
-
-
 
 # My Portfolios Route
 @app.route('/my-portfolios')
