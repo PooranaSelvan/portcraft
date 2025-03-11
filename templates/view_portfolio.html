@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-<div id="portfolio-content">
-    {{ portfolio.content | safe }}
+<div class="portfolio-preview">
+    <h2>{{ portfolio.content.name }}</h2>
+    <p><strong>About:</strong> {{ portfolio.content.about }}</p>
+    <p><strong>Skills:</strong> {{ portfolio.content.skills | join(', ') }}</p>
+    <p><strong>Contact:</strong> {{ portfolio.content.contact }}</p>
+
+    <h3>Projects</h3>
+    <ul>
+        {% for project in portfolio.content.projects %}
+            <li><a href="{{ project }}" target="_blank">{{ project }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h3>Social Media Links</h3>
+    <ul>
+        {% for link in portfolio.content.social_links %}
+            <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}
-

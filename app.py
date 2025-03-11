@@ -94,28 +94,31 @@ def view_portfolio(username, portfolio_id):
 
 @app.route('/save_portfolio', methods=['POST'])
 def save_portfolio():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
     # Extract form data
     name = request.form.get('name')
     about = request.form.get('about')
     skills = request.form.get('skills').split(',')
-    work = request.form.get('work')
-    projects = request.form.get('projects').split(',')
     contact = request.form.get('contact')
+    projects = request.form.get('projects').split(',')
     social_links = request.form.get('social_links').split(',')
 
-    # Save data to MongoDB
+    # Save data to MongoDB with a content field
     portfolio_data = {
-        'name': name,
-        'about': about,
-        'skills': skills,
-        'work': work,
-        'projects': projects,
-        'contact': contact,
-        'social_links': social_links,
-        'user_id': session['user_id']  # Save by user ID for authentication
+        'user_id': ObjectId(session['user_id']),  # Save by user ID for authentication
+        'content': {
+            'name': name,
+            'about': about,
+            'skills': skills,
+            'contact': contact,
+            'projects': projects,
+            'social_links': social_links
+        }
     }
-    mongo.db.portfolios.insert_one(portfolio_data)
 
+    mongo.db.portfolios.insert_one(portfolio_data)
 
     flash('Portfolio saved successfully!', 'success')
     return redirect(url_for('my_portfolios'))
@@ -137,16 +140,29 @@ def delete_portfolio(portfolio_id):
 
 # Preview Portfolio Route
 @app.route('/preview', methods=['POST'])
-def preview():
-    portfolio_data = {
-        'name': request.form.get('name', 'Not provided'),
-        'about': request.form.get('about', 'Not provided'),
-        'skills': request.form.get('skills', 'Not provided'),
-        'contact': request.form.get('contact', 'Not provided'),
-        'projects': request.form.getlist('projects'),  # Make sure this is a list
-        'social_links': request.form.getlist('social_links')  # Make sure this is a list
-    }
-    return render_template('preview.html', portfolio_data=portfolio_data)
+def preview_portfolio():
+    # Extract form data
+    name = request.form.get('name')
+    about = request.form.get('about')
+    skills = request.form.get('skills')
+    contact = request.form.get('contact')
+    projects = request.form.get('projects')
+    social_links = request.form.get('social_links')
+
+    # Check if required fields are provided
+    if not name or not about or not skills or not contact or not projects:
+        return "Error: Please fill in all required fields.", 400  # Return error message and status code
+
+    # Render the preview template with the provided data
+    return render_template('preview.html', portfolio_data={
+        'name': name,
+        'about': about,
+        'skills': skills.split(','),
+        'contact': contact,
+        'projects': projects.split(','),
+        'social_links': social_links.split(',')
+    })
+
 
 # My Portfolios Route
 @app.route('/my-portfolios')
@@ -160,28 +176,39 @@ def my_portfolios():
     return render_template('my_portfolios.html', portfolios=portfolios)
 
 # Edit Portfolio Route
-@app.route('/edit-portfolio/<portfolio_id>', methods=['GET', 'POST'])
+@app.route('/edit_portfolio/<portfolio_id>', methods=['GET', 'POST'])
 def edit_portfolio(portfolio_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-
-    portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
-
     if request.method == 'POST':
-        updated_data = {
-            'name': request.form['name'],
-            'about': request.form['about'],
-            'skills': request.form['skills'],
-            'work': request.form['work'],
-            'projects': request.form['projects'],
-            'contact': request.form['contact'],
-            'social_links': request.form['social_links'].split(',')
-        }
+        # Extract form data
+        name = request.form.get('name')
+        about = request.form.get('about')
+        skills = request.form.get('skills').split(',')
+        contact = request.form.get('contact')
+        work = request.form.get('work')  # Ensure this line is included
+        projects = request.form.get('projects').split(',')
+        social_links = request.form.get('social_links').split(',')
 
-        mongo.db.portfolios.update_one({'_id': ObjectId(portfolio_id)}, {'$set': {'content': updated_data}})
+        # Update the portfolio in the database
+        mongo.db.portfolios.update_one(
+            {'_id': ObjectId(portfolio_id)},
+            {'$set': {
+                'content': {
+                    'name': name,
+                    'about': about,
+                    'skills': skills,
+                    'contact': contact,
+                    'work': work,  # Ensure this line is included
+                    'projects': projects,
+                    'social_links': social_links
+                }
+            }}
+        )
+
         flash('Portfolio updated successfully!', 'success')
         return redirect(url_for('my_portfolios'))
 
+    # If GET request, retrieve the portfolio data
+    portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
     return render_template('edit_portfolio.html', portfolio=portfolio)
 
 if __name__ == '__main__':

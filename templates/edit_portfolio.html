@@ -4,44 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Edit Portfolio</h1>
-    <form id="editPortfolioForm">
-        <label>Name:</label>
-        <input type="text" id="name" value="{{ portfolio.content.name }}">
+    <div class="container">
+        <h1>Edit Portfolio</h1>
+        <form id="editPortfolioForm" method="POST" action="{{ url_for('edit_portfolio', portfolio_id=portfolio._id) }}">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" value="{{ portfolio.content.name }}" required>
+            </div>
 
-        <label>About:</label>
-        <textarea id="about">{{ portfolio.content.about }}</textarea>
+            <div class="form-group">
+                <label for="about">About Me:</label>
+                <textarea id="about" name="about" required>{{ portfolio.content.about }}</textarea>
+            </div>
 
-        <label>Projects:</label>
-        <textarea id="projects">{{ portfolio.content.projects }}</textarea>
+            <div class="form-group">
+                <label for="skills">Skills (comma separated):</label>
+                <input type="text" id="skills" name="skills" value="{{ portfolio.content.skills | join(', ') }}" required>
+            </div>
 
-        <button type="submit">Save Changes</button>
-    </form>
+            <div class="form-group">
+                <label for="contact">Contact Information:</label>
+                <input type="text" id="contact" name="contact" value="{{ portfolio.content.contact }}" required>
+            </div>
 
-    <script>
-        document.getElementById('editPortfolioForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+            <div class="form-group">
+                <label for="work">Work Experience:</label>
+                <textarea id="work" name="work">{{ portfolio.content.work }}</textarea>
+            </div>
 
-            const updatedData = {
-                name: document.getElementById('name').value,
-                about: document.getElementById('about').value,
-                projects: document.getElementById('projects').value
-            };
+            <div class="form-group">
+                <label for="projects">Projects (comma separated links):</label>
+                <textarea id="projects" name="projects" required>{{ portfolio.content.projects | join(', ') }}</textarea>
+            </div>
 
-            fetch("{{ url_for('edit_portfolio', portfolio_id=portfolio._id) }}", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = data.redirect_url;
-                }
-            });
-        });
-    </script>
+            <div class="form-group">
+                <label for="social_links">Social Media Links (comma separated):</label>
+                <input type="text" id="social_links" name="social_links" value="{{ portfolio.content.social_links | join(', ') }}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

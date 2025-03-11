@@ -46,21 +46,19 @@
             display: block;
         }
         .save-button {
-    display: inline-block;
-    background-color: #007BFF;
-    color: #fff;
-    padding: 10px 20px;
-    text-decoration: none;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.save-button:hover {
-    background-color: #0056b3;
-}
-
+            display: inline-block;
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .save-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -81,10 +79,7 @@
             <p><strong>Skills:</strong> {{ portfolio_data.get('skills', 'Not provided') }}</p>
             <p><strong>Contact:</strong> {{ portfolio_data.get('contact', 'Not provided') }}</p>
         </section>
-        <!-- Save Button -->
-        <div style="text-align: right; margin-top: 20px;">
-            <button class="save-button" onclick="savePortfolio()">Save</button>
-        </div>
+
         <!-- Projects Section -->
         <section id="projects">
             <h2>Projects</h2>
@@ -114,6 +109,19 @@
                 <p>No social media links available.</p>
             {% endif %}
         </section>
+
+        <!-- Save Button -->
+        <div style="text-align: right; margin-top: 20px;">
+            <form id="savePortfolioForm" method="POST" action="{{ url_for('save_portfolio') }}">
+                <input type="hidden" name="name" value="{{ portfolio_data.get('name', 'Not provided') }}">
+                <input type="hidden" name="about" value="{{ portfolio_data.get('about', 'Not provided') }}">
+                <input type="hidden" name="skills" value="{{ portfolio_data.get('skills', 'Not provided') }}">
+                <input type="hidden" name="contact" value="{{ portfolio_data.get('contact', 'Not provided') }}">
+                <input type="hidden" name="projects" value="{{ portfolio_data.get('projects', []) | join(',') }}">
+                <input type="hidden" name="social_links" value="{{ portfolio_data.get('social_links', []) | join(',') }}">
+                <button type="submit" class="save-button">Save</button>
+            </form>
+        </div>
     </div>
 
     <script>

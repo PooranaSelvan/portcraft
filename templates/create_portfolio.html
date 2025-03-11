@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Create Your Portfolio</h2>
-<form action="{{ url_for('preview') }}" method="post">
+<form action="/preview" method="post" id="portfolio-form">
     <!-- Personal Information -->
     <div class="form-group">
         <label for="name">Full Name:</label>
@@ -60,30 +60,27 @@
 
 <!-- JavaScript for Live Preview -->
 <script>
-    document.getElementById('preview-portfolio').addEventListener('click', function () {
-        const formData = {
-            name: document.getElementById('name').value,
-            about: document.getElementById('about').value,
-            skills: document.getElementById('skills').value,
-            work: document.getElementById('work').value,
-            projects: document.getElementById('projects').value,
-            contact: document.getElementById('contact').value,
-            social_links: document.getElementById('social-links').value.split(',')
-        };
+    document.getElementById('portfolio-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
 
-        fetch('{{ url_for("preview") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('preview-content').innerHTML = html;
-            document.getElementById('preview-modal').style.display = 'block';
-        });
-    });
+    fetch('http://127.0.0.1:5000/preview', {  // If running locally
+    method: 'POST',
+    body: formData
+})
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok.');
+        }
+        return response.text();  // Expecting HTML as the response
+    })
+    .then(html => {
+        document.getElementById('preview-content').innerHTML = html;
+        document.getElementById('preview-modal').style.display = 'block';
+    })
+    .catch(error => console.error('Error:', error));
+});
+
 
     document.getElementById('close-preview').addEventListener('click', function () {
         document.getElementById('preview-modal').style.display = 'none';
@@ -138,11 +135,7 @@
     }
     .btn-primary {
         background-color: #3498db;
-        color: #fff;
-    }
-    .btn-secondary {
-        background-color: #95a5a6;
-        color: #fff;
+        color: white;
     }
     .modal {
         display: none;
@@ -158,7 +151,7 @@
         align-items: center;
     }
     .modal-content {
-        background: #fff;
+        background: white;
         padding: 20px;
         border-radius: 10px;
         max-width: 80%;
