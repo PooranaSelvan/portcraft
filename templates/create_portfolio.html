@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Create Your Portfolio</h2>
-<form action="/preview" method="post" id="portfolio-form">
+<form action="/preview-portfolio" method="post" id="portfolio-form" autocomplete="on">
     <!-- Personal Information -->
     <div class="form-group">
         <label for="name">Full Name:</label>
-        <input type="text" id="name" name="name" placeholder="John Doe" required>
+        <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="name" required>
     </div>
 
     <!-- About Section -->
@@ -17,7 +17,7 @@
     <!-- Skills Section -->
     <div class="form-group">
         <label for="skills">Skills (comma separated):</label>
-        <input type="text" id="skills" name="skills" placeholder="HTML, CSS, JavaScript" required>
+        <input type="text" id="skills" name="skills" placeholder="HTML, CSS, JavaScript" autocomplete="off" required>
     </div>
 
     <!-- Work Experience -->
@@ -35,18 +35,18 @@
     <!-- Contact Information -->
     <div class="form-group">
         <label for="contact">Contact Information:</label>
-        <input type="text" id="contact" name="contact" placeholder="Email or Phone Number" required>
+        <input type="text" id="contact" name="contact" placeholder="Email or Phone Number" autocomplete="tel" required>
     </div>
 
     <!-- Social Media Links -->
     <div class="form-group">
-        <label for="social-links">Social Media Links (comma separated):</label>
-        <input type="text" id="social-links" name="social_links" placeholder="https://linkedin.com, https://github.com">
+        <label for="social_links">Social Media Links (comma separated):</label>
+        <input type="text" id="social_links" name="social_links" placeholder="https://linkedin.com, https://github.com" autocomplete="url">
     </div>
 
     <!-- Buttons -->
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary" id="preview-portfolio">Create Your Portfolio</button>
+        <button type="submit" class="btn btn-primary">Create Your Portfolio</button>
     </div>
 </form>
 
@@ -61,33 +61,32 @@
 <!-- JavaScript for Live Preview -->
 <script>
     document.getElementById('portfolio-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const formData = new FormData(this);
+        event.preventDefault();
+        const formData = new FormData(this);
 
-    fetch('http://127.0.0.1:5000/preview', {  // If running locally
-    method: 'POST',
-    body: formData
-})
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok.');
-        }
-        return response.text();  // Expecting HTML as the response
-    })
-    .then(html => {
-        document.getElementById('preview-content').innerHTML = html;
-        document.getElementById('preview-modal').style.display = 'block';
-    })
-    .catch(error => console.error('Error:', error));
-});
-
+        fetch('/preview-portfolio', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return response.text();
+        })
+        .then(html => {
+            document.getElementById('preview-content').innerHTML = html;
+            document.getElementById('preview-modal').style.display = 'block';
+        })
+        .catch(error => console.error('Error:', error));
+    });
 
     document.getElementById('close-preview').addEventListener('click', function () {
         document.getElementById('preview-modal').style.display = 'none';
     });
 
     window.onclick = function(event) {
-        if (event.target == document.getElementById('preview-modal')) {
+        if (event.target === document.getElementById('preview-modal')) {
             document.getElementById('preview-modal').style.display = 'none';
         }
     }

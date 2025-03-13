@@ -139,29 +139,33 @@ def delete_portfolio(portfolio_id):
     return redirect(url_for('my_portfolios'))
 
 # Preview Portfolio Route
-@app.route('/preview', methods=['POST'])
+@app.route('/preview-portfolio', methods=['GET', 'POST'])
 def preview_portfolio():
-    # Extract form data
-    name = request.form.get('name')
-    about = request.form.get('about')
-    skills = request.form.get('skills')
-    contact = request.form.get('contact')
-    projects = request.form.get('projects')
-    social_links = request.form.get('social_links')
+    if request.method == 'POST':
+        # Fetching form data correctly
+        name = request.form.get('name')
+        about = request.form.get('about')
+        skills = request.form.get('skills')
+        work_experiences = request.form.get('work')
+        contact = request.form.get('contact')
 
-    # Check if required fields are provided
-    if not name or not about or not skills or not contact or not projects:
-        return "Error: Please fill in all required fields.", 400  # Return error message and status code
+        # Fetching and processing projects and social links
+        projects = request.form.get('projects').split(',') if request.form.get('projects') else []
+        social_links = request.form.get('social_links').split(',') if request.form.get('social_links') else []
 
-    # Render the preview template with the provided data
-    return render_template('preview.html', portfolio_data={
-        'name': name,
-        'about': about,
-        'skills': skills.split(','),
-        'contact': contact,
-        'projects': projects.split(','),
-        'social_links': social_links.split(',')
-    })
+        portfolio_data = {
+            'name': name,
+            'about': about,
+            'skills': skills,
+            'work_experiences': work_experiences,
+            'contact': contact,
+            'projects': projects,
+            'social_links': social_links
+        }
+
+        return render_template('preview.html', portfolio_data=portfolio_data)
+
+    return render_template('create_portfolio.html')
 
 
 # My Portfolios Route
