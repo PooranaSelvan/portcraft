@@ -49,7 +49,7 @@ document.getElementById('preview-portfolio').addEventListener('click', function(
     .catch(error => console.error('Error:', error));
 });
 
-ddocument.getElementById('preview-portfolio').addEventListener('click', function() {
+document.getElementById('preview-portfolio').addEventListener('click', function() {
     const portfolioData = {
         name: document.getElementById('name').value.trim(),
         about: document.getElementById('about').value.trim(),
