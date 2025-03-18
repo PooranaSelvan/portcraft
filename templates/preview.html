@@ -1,101 +1,118 @@
-{% extends "base.html" %}
-
-{% block content %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio Preview</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+        .close-icon {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 30px;
+            color: #dc3545;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .save-button {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            transition: all 0.3s;
+            z-index: 1051;
+        }
+        .save-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5 mb-5 p-4 bg-white rounded shadow-lg d-flex flex-wrap flex-column gap-2">
-        <div class="row mb-4">
-            <div class="col text-center">
-                <h1 class="text-primary">Portfolio Preview</h1>
-            </div>
-        </div>
+    <div class="preview-modal">
+        <div class="modal-content">
+            <a href="{{ url_for('my_portfolios') }}" class="close-icon">&times;</a>
+            <div class="container-fluid mt-3">
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <img src="{{ portfolio_data.get('profile_photo', 'https://via.placeholder.com/150') }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Image">
+                            <h4>{{ portfolio_data.get('name', 'Not provided') }}</h4>
+                            <p>{{ portfolio_data.get('about', 'Not provided') }}</p>
+                            <h5>Social Media Links</h5>
+                            {% for link in portfolio_data.get('social_links', []) %}
+                            <div><a href="{{ link }}" target="_blank">{{ link }}</a></div>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-        <!-- About Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">About Me</div>
-                    <div class="card-body">
-                        <p><strong>Name:</strong> {{ portfolio_data.get('name', 'Not provided') }}</p>
-                        <p><strong>About:</strong> {{ portfolio_data.get('about', 'Not provided') }}</p>
-                        <p><strong>Skills:</strong> {{ portfolio_data.get('skills', 'Not provided') }}</p>
-                        <p><strong>Contact:</strong> {{ portfolio_data.get('contact', 'Not provided') }}</p>
+                    <!-- Main Content -->
+                    <div class="col-md-9">
+                        <h5>Skills</h5>
+                        <p>{{ portfolio_data.get('skills', 'Not provided') }}</p>
+
+                        <h5>Contact</h5>
+                        <p>{{ portfolio_data.get('contact', 'Not provided') }}</p>
+
+                        <h5>Projects</h5>
+                        <div class="row">
+                            {% for project in portfolio_data.get('projects', []) %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <a href="{{ project }}" target="_blank">{{ project }}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Projects Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">Projects</div>
-                    <div class="card-body">
-                        {% set projects = portfolio_data.get('projects', []) %}
-                        {% if projects %}
-                            <ul class="list-group">
-                                {% for project in projects %}
-                                    <li class="list-group-item">
-                                        <a href="{{ project }}" target="_blank" class="text-decoration-none">{{ project }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p>No projects available.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Social Media Section -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card border-info">
-                    <div class="card-header bg-info text-white">Social Media Links</div>
-                    <div class="card-body">
-                        {% set social_links = portfolio_data.get('social_links', []) %}
-                        {% if social_links %}
-                            <ul class="list-group">
-                                {% for link in social_links %}
-                                    <li class="list-group-item">
-                                        <a href="{{ link }}" target="_blank" class="text-decoration-none">{{ link }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p>No social media links available.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="row">
-            <div class="col text-end">
-                <form id="savePortfolioForm" method="POST" action="{{ url_for('save_portfolio') }}">
-                    <input type="hidden" name="name" value="{{ portfolio_data.get('name', 'Not provided') }}">
-                    <input type="hidden" name="about" value="{{ portfolio_data.get('about', 'Not provided') }}">
-                    <input type="hidden" name="skills" value="{{ portfolio_data.get('skills', 'Not provided') }}">
-                    <input type="hidden" name="contact" value="{{ portfolio_data.get('contact', 'Not provided') }}">
-                    <input type="hidden" name="projects" value="{{ portfolio_data.get('projects', []) | join(',') }}">
-                    <input type="hidden" name="social_links" value="{{ portfolio_data.get('social_links', []) | join(',') }}">
-                    <button type="submit" class="btn btn-primary btn-lg">Save</button>
-                </form>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle (with Popper) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Save Button -->
+    <form id="savePortfolioForm" method="POST" action="{{ url_for('save_portfolio') }}">
+        <input type="hidden" name="name" value="{{ portfolio_data.get('name', 'Not provided') }}">
+        <input type="hidden" name="about" value="{{ portfolio_data.get('about', 'Not provided') }}">
+        <input type="hidden" name="skills" value="{{ portfolio_data.get('skills', 'Not provided') }}">
+        <input type="hidden" name="contact" value="{{ portfolio_data.get('contact', 'Not provided') }}">
+        <input type="hidden" name="projects" value="{{ portfolio_data.get('projects', []) | join(',') }}">
+        <input type="hidden" name="social_links" value="{{ portfolio_data.get('social_links', []) | join(',') }}">
+        <button type="submit" class="save-button">Save Portfolio</button>
+    </form>
 </body>
 </html>
-{% endblock %}
