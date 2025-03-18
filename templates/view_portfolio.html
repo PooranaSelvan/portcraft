@@ -15,15 +15,21 @@
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            height: 100vh;
+            height: 90vh;
+            margin-left: 60px;
+            margin-bottom: 20px;
             text-align: center;
+            margin-right: 20px;
+            position: relative;
         }
-        .content-section {
+        .main-content {
             background-color: #fff;
-            padding: 25px;
+            padding: 30px;
             border-radius: 15px;
+            height: 90vh;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            position: relative;
         }
         .profile-img {
             width: 150px;
@@ -45,17 +51,36 @@
         .social-links a:hover {
             background-color: #e2e6ea;
         }
+        .content-section {
+            margin-bottom: 20px;
+        }
+        .close-icon {
+            position: absolute;
+            top: -40px;
+            left: 20px;
+            font-size: 45px;
+            color: #dc3545;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        .close-icon:hover {
+            color: #c82333;
+        }
     </style>
 </head>
 <body>
-    <div class="container-fluid mt-5">
-        <div class="row">
+    <div class="container-fluid mt-5 position-relative">
+        <!-- Close Icon Positioned Outside the Sidebar -->
+        <a href="{{ url_for('my_portfolios') }}" class="close-icon">&times;</a>
+
+        <div class="row gx-3">
             <!-- Sidebar -->
-            <div class="col-md-3 sidebar">
+            <div class="col-md-2 sidebar">
                 <img src="{{ portfolio.content.profile_photo or 'https://via.placeholder.com/300' }}" class="profile-img" alt="Profile Image">
                 <h4>{{ portfolio.content.name }}</h4>
                 <p>{{ portfolio.content.about }}</p>
-
                 <h5>Social Media Links</h5>
                 <div class="social-links">
                     {% for link in portfolio.content.social_links %}
@@ -65,7 +90,7 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-md-9">
+            <div class="col-md-9 main-content">
                 <div class="content-section">
                     <h5>Skills</h5>
                     <p>{{ portfolio.content.skills | join(', ') }}</p>
