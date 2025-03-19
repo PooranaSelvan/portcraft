@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = os.urandom(24)
-app.config["MONGO_ URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
+app.config["MONGO_URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
 mongo = PyMongo(app)
 
 # Home Route
@@ -87,9 +87,15 @@ def create_portfolio():
 # View Portfolio Route
 @app.route('/portfolio/<username>/<portfolio_id>')
 def view_portfolio(username, portfolio_id):
+    # Fetch the portfolio from the database using the portfolio_id
     portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
+
+    # Check if the portfolio exists
     if portfolio:
+        # Render the view_portfolio.html template with the portfolio data
         return render_template('view_portfolio.html', portfolio=portfolio)
+
+    # If the portfolio is not found, return a 404 error
     return "Portfolio not found", 404
 
 
@@ -140,34 +146,7 @@ def delete_portfolio(portfolio_id):
     return redirect(url_for('my_portfolios'))
 
 
-from bson import ObjectId
-
-@app.route('/view_portfolio_page/<portfolio_id>', methods=['GET'])
-def display_portfolio(portfolio_id):
-    portfolio = mongo.db.portfolios.find_one({"_id": ObjectId(portfolio_id)})
-
-    if portfolio is None:
-        return "Portfolio not found.", 404
-
-    # Fetching portfolio content data correctly
-    portfolio_content = portfolio.get('content', {})
-
-    # Preparing the portfolio data structure
-    portfolio_data = {
-        'name': portfolio_content.get('name'),
-        'about': portfolio_content.get('about'),
-        'skills': portfolio_content.get('skills'),
-        'work_experiences': portfolio_content.get('work_experiences'),
-        'contact': portfolio_content.get('contact'),
-        'projects': portfolio_content.get('projects', []),
-        'social_links': portfolio_content.get('social_links', []),
-        'project_images': portfolio_content.get('project_images', []),
-        'profile_photo': portfolio_content.get('profile_photo', 'https://via.placeholder.com/150')
-    }
-
-    return render_template('view_portfolio.html', portfolio_data=portfolio_data)
-
-
+from bson import ObjectId  # Make sure you import ObjectId
 
 # Preview Portfolio Route
 @app.route('/preview-portfolio', methods=['GET', 'POST'])
