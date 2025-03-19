@@ -2,7 +2,7 @@
 {% block content %}
 
 <h2>Create Your Portfolio</h2>
-<form action="/preview-portfolio" method="post" id="portfolio-form" autocomplete="on">
+<form action="/preview-portfolio" method="post" id="portfolio-form" enctype="multipart/form-data" autocomplete="on">
     <!-- Personal Information -->
     <div class="form-group">
         <label for="name">Full Name:</label>
@@ -29,8 +29,8 @@
 
     <!-- Projects Section -->
     <div class="form-group">
-        <label for="projects">Projects (comma separated links):</label>
-        <textarea id="projects" name="projects" placeholder="https://project1.com, https://project2.com" required></textarea>
+        <label for="project_images">Upload Project Images:</label>
+        <input type="file" id="project_images" name="project_images" multiple>
     </div>
 
     <!-- Contact Information -->
@@ -61,33 +61,33 @@
 
 <!-- JavaScript for Live Preview -->
 <script>
-    document.getElementById('portfolio-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const formData = new FormData(this);
+    document.getElementById('project_images').addEventListener('change', function(event) {
+        const files = event.target.files;
+        const formData = new FormData();
 
-        fetch('/preview-portfolio', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('preview-content').innerHTML = html;
-            document.getElementById('preview-modal').style.display = 'flex';
-            localStorage.setItem('previewActive', 'true');
-        })
-        .catch(error => console.error('Error:', error));
+        document.getElementById('portfolio-form').dataset.images = ''; // Clear existing images in dataset
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                // Store the base64 data URL in a hidden input field
+                const imageData = e.target.result;
+                if (!document.getElementById('image-data-' + index)) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'project_images';
+                    hiddenInput.value = imageData;
+                    hiddenInput.id = 'image-data-' + index;
+                    document.getElementById('portfolio-form').appendChild(hiddenInput);
+                }
+            };
+
+            reader.readAsDataURL(file);
+        });
     });
-
-    document.getElementById('close-preview').addEventListener('click', function () {
-        document.getElementById('preview-modal').style.display = 'none';
-        localStorage.removeItem('previewActive');
-    });
-
-    if (localStorage.getItem('previewActive') === 'true') {
-        document.getElementById('preview-modal').style.display = 'none';
-        localStorage.removeItem('previewActive');
-    }
 </script>
+
 
 <!-- Styles for Form and Modal -->
 <style>

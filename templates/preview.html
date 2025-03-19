@@ -28,8 +28,40 @@
             border-radius: 15px;
             width: 90%;
             height: 90%;
-            overflow-y: auto;
+            display: flex;
+            overflow: hidden;
             position: relative;
+        }
+        .sidebar {
+            position: fixed;
+            left: 100px;
+            top: 70px;
+            bottom: 20px;
+            width: 250px;
+            height: 300px
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            overflow-y: auto;
+        }
+        .main-content {
+            margin-left: 290px; /* Width of sidebar + padding */
+            padding: 20px;
+            width: calc(100% - 310px);
+            height: 100%;
+            overflow-y: auto;
+        }
+        .project-img {
+            width: 290px;
+            height: 290px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .card {
+            width: 290px;
+            height: 290px;
+            object-fit: cover;
+            border-radius: 10px;
         }
         .close-icon {
             position: absolute;
@@ -42,14 +74,13 @@
         }
         .save-button {
             position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 70px;
+            right: 700px;
             padding: 15px 30px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 10px;
             font-size: 18px;
             transition: all 0.3s;
             z-index: 1051;
@@ -62,43 +93,46 @@
 <body>
     <div class="preview-modal">
         <div class="modal-content">
-            <a href="{{ url_for('my_portfolios') }}" class="close-icon">&times;</a>
-            <div class="container-fluid mt-3">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="text-center">
+                    <img src="{{ portfolio_data.get('profile_photo', 'https://via.placeholder.com/150') }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Image">
+                    <h4>{{ portfolio_data.get('name', 'Not provided') }}</h4>
+                    <p>{{ portfolio_data.get('about', 'Not provided') }}</p>
+
+                    <h5>Social Media Links</h5>
+                    {% if portfolio_data.get('social_links') %}
+                        {% for link in portfolio_data.get('social_links') %}
+                        <div><a href="{{ link }}" target="_blank">{{ link }}</a></div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No links provided.</p>
+                    {% endif %}
+
+                    <h5>Skills</h5>
+                    <p>{{ portfolio_data.get('skills', 'Not provided') }}</p>
+
+                    <h5>Contact</h5>
+                    <p>{{ portfolio_data.get('contact', 'Not provided') }}</p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <a href="{{ url_for('my_portfolios') }}" class="close-icon">&times;</a>
+                <h5>Projects</h5>
                 <div class="row">
-                    <!-- Sidebar -->
-                    <div class="col-md-3">
-                        <div class="text-center">
-                            <img src="{{ portfolio_data.get('profile_photo', 'https://via.placeholder.com/150') }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Image">
-                            <h4>{{ portfolio_data.get('name', 'Not provided') }}</h4>
-                            <p>{{ portfolio_data.get('about', 'Not provided') }}</p>
-                            <h5>Social Media Links</h5>
-                            {% for link in portfolio_data.get('social_links', []) %}
-                            <div><a href="{{ link }}" target="_blank">{{ link }}</a></div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Main Content -->
-                    <div class="col-md-9">
-                        <h5>Skills</h5>
-                        <p>{{ portfolio_data.get('skills', 'Not provided') }}</p>
-
-                        <h5>Contact</h5>
-                        <p>{{ portfolio_data.get('contact', 'Not provided') }}</p>
-
-                        <h5>Projects</h5>
-                        <div class="row">
-                            {% for project in portfolio_data.get('projects', []) %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <a href="{{ project }}" target="_blank">{{ project }}</a>
-                                    </div>
-                                </div>
+                    {% if portfolio_data.get('project_images') %}
+                        {% for project_image in portfolio_data.get('project_images') %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <img src="{{ project_image }}" class="card-img-top project-img" alt="Project Image">
                             </div>
-                            {% endfor %}
                         </div>
-                    </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No projects added.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -112,6 +146,7 @@
         <input type="hidden" name="contact" value="{{ portfolio_data.get('contact', 'Not provided') }}">
         <input type="hidden" name="projects" value="{{ portfolio_data.get('projects', []) | join(',') }}">
         <input type="hidden" name="social_links" value="{{ portfolio_data.get('social_links', []) | join(',') }}">
+        <input type="hidden" name="project_images" value="{{ portfolio_data.get('project_images', []) | join(',') }}">
         <button type="submit" class="save-button">Save Portfolio</button>
     </form>
 </body>

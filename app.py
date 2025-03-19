@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import base64
 from bson.objectid import ObjectId
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = os.urandom(24)
-app.config["MONGO_URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
+app.config["MONGO_ URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
 mongo = PyMongo(app)
 
 # Home Route
@@ -138,6 +139,36 @@ def delete_portfolio(portfolio_id):
         flash('Portfolio not found.', 'error')
     return redirect(url_for('my_portfolios'))
 
+
+from bson import ObjectId
+
+@app.route('/view_portfolio_page/<portfolio_id>', methods=['GET'])
+def display_portfolio(portfolio_id):
+    portfolio = mongo.db.portfolios.find_one({"_id": ObjectId(portfolio_id)})
+
+    if portfolio is None:
+        return "Portfolio not found.", 404
+
+    # Fetching portfolio content data correctly
+    portfolio_content = portfolio.get('content', {})
+
+    # Preparing the portfolio data structure
+    portfolio_data = {
+        'name': portfolio_content.get('name'),
+        'about': portfolio_content.get('about'),
+        'skills': portfolio_content.get('skills'),
+        'work_experiences': portfolio_content.get('work_experiences'),
+        'contact': portfolio_content.get('contact'),
+        'projects': portfolio_content.get('projects', []),
+        'social_links': portfolio_content.get('social_links', []),
+        'project_images': portfolio_content.get('project_images', []),
+        'profile_photo': portfolio_content.get('profile_photo', 'https://via.placeholder.com/150')
+    }
+
+    return render_template('view_portfolio.html', portfolio_data=portfolio_data)
+
+
+
 # Preview Portfolio Route
 @app.route('/preview-portfolio', methods=['GET', 'POST'])
 def preview_portfolio():
@@ -153,6 +184,18 @@ def preview_portfolio():
         projects = request.form.get('projects').split(',') if request.form.get('projects') else []
         social_links = request.form.get('social_links').split(',') if request.form.get('social_links') else []
 
+        # Handling the project images
+        project_images = []
+        if 'project_images' in request.files:
+            files = request.files.getlist('project_images')
+
+            for file in files:
+                if file:
+                    # Convert file to base64 string
+                    image_data = base64.b64encode(file.read()).decode('utf-8')
+                    # Append the image as a base64 string with prefix
+                    project_images.append(f"data:image/jpeg;base64,{image_data}")
+
         portfolio_data = {
             'name': name,
             'about': about,
@@ -160,7 +203,8 @@ def preview_portfolio():
             'work_experiences': work_experiences,
             'contact': contact,
             'projects': projects,
-            'social_links': social_links
+            'social_links': social_links,
+            'project_images': project_images
         }
 
         return render_template('preview.html', portfolio_data=portfolio_data)
