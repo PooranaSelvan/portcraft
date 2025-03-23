@@ -42,13 +42,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="text-center">
-            <img src="{{ portfolio.content.get('profile_photo', 'https://via.placeholder.com/150') }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Image">
-            <h4>{{ portfolio.content.get('name', 'Not provided') }}</h4>
-            <p>{{ portfolio.content.get('about', 'Not provided') }}</p>
+            <img src="{{ portfolio['content'].get('profile_photo', 'https://via.placeholder.com/150') }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Image">
+            <h4>{{ portfolio['content'].get('name', 'Not provided') }}</h4>
+            <p>{{ portfolio['content'].get('about', 'Not provided') }}</p>
 
-            <h5>Social Media Links</h5>
-            {% if portfolio.content.get('social_links') %}
-                {% for link in portfolio.content.get('social_links') %}
+                    <h5>Social Media Links</h5>
+            {% if portfolio['content'].get('social_links') %}
+                {% for link in portfolio['content']['social_links'] %}
                     <div><a href="{{ link }}" target="_blank">{{ link }}</a></div>
                 {% endfor %}
             {% else %}
@@ -56,29 +56,30 @@
             {% endif %}
 
             <h5>Skills</h5>
-            <p>{{ portfolio.content.get('skills', 'Not provided') }}</p>
+            <p>{{ ', '.join(portfolio['content'].get('skills', [])) or 'Not provided' }}</p>
 
             <h5>Contact</h5>
-            <p>{{ portfolio.content.get('contact', 'Not provided') }}</p>
+            <p>{{ portfolio['content'].get('contact', 'Not provided') }}</p>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <h5>Projects</h5>
-        <div class="row">
-            {% if portfolio.content.get('project_images') %}
-                {% for project_image in portfolio.content.get('project_images') %}
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
-                            <img src="{{ project_image }}" class="card-img-top project-img" alt="Project Image">
-                        </div>
+<!-- Main Content -->
+<div class="main-content">
+    <h5>Projects</h5>
+    <div class="row">
+        {% if portfolio['content'].get('project_images') %}
+            {% for project_image in portfolio['content']['project_images'] %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename=project_image) }}" class="card-img-top project-img" alt="Project Image">
                     </div>
-                {% endfor %}
-            {% else %}
-                <p>No projects added.</p>
-            {% endif %}
-        </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No projects added.</p>
+        {% endif %}
     </div>
+</div>
+
 </body>
 </html>

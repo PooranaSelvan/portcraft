@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_pymongo import PyMongo
+from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import base64
@@ -74,6 +75,20 @@ def create_portfolio():
 
         user_id = ObjectId(session['user_id'])
 
+        # Handle project images
+        project_images = []
+        if 'project_images' in request.files:
+            files = request.files.getlist('project_images')
+            for file in files:
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    project_images.append(f'uploads/{filename}')
+
+        # Include project_images in the portfolio data
+        portfolio_data['project_images'] = project_images
+
         mongo.db.portfolios.insert_one({
             'user_id': user_id,
             'content': portfolio_data
@@ -92,41 +107,52 @@ def view_portfolio(username, portfolio_id):
 
     # Check if the portfolio exists
     if portfolio:
+        portfolio['content'] = portfolio.get('content', {})
+        portfolio['project_images'] = portfolio.get('project_images', [])  # Ensure images are included
+
         # Render the view_portfolio.html template with the portfolio data
         return render_template('view_portfolio.html', portfolio=portfolio)
 
     # If the portfolio is not found, return a 404 error
     return "Portfolio not found", 404
 
-
+# Save Portfolio Route
 @app.route('/save_portfolio', methods=['POST'])
 def save_portfolio():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    # Extract form data
     name = request.form.get('name')
     about = request.form.get('about')
     skills = request.form.get('skills').split(',')
     contact = request.form.get('contact')
-    projects = request.form.get('projects').split(',')
     social_links = request.form.get('social_links').split(',')
 
-    # Save data to MongoDB with a content field
+    # Handling project images
+    project_images = []
+    if 'project_images' in request.files:
+        files = request.files.getlist('project_images')
+        for file in files:
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                project_images.append(f'uploads/{filename}')
+
+    # Save data to MongoDB
     portfolio_data = {
-        'user_id': ObjectId(session['user_id']),  # Save by user ID for authentication
+        'user_id': ObjectId(session['user_id']),
         'content': {
             'name': name,
             'about': about,
             'skills': skills,
             'contact': contact,
-            'projects': projects,
-            'social_links': social_links
+            'social_links': social_links,
+            'project_images': project_images
         }
     }
 
     mongo.db.portfolios.insert_one(portfolio_data)
-
     flash('Portfolio saved successfully!', 'success')
     return redirect(url_for('my_portfolios'))
 
