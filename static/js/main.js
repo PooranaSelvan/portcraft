@@ -151,7 +151,7 @@ document.getElementById('preview-portfolio').addEventListener('click', function(
     localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
 
     // Redirect to the preview page
-    window.location.href = '/preview-portfolio';
+    window.location.href = '/my-portfolios';
 });
 
 
