@@ -2,7 +2,7 @@
 {% block content %}
 
 <h2>Create Your Portfolio</h2>
-<form action="/my-portfolios" method="post" id="portfolio-form" enctype="multipart/form-data" autocomplete="on">
+<form action="/preview-portfolio" method="post" id="portfolio-form" enctype="multipart/form-data" autocomplete="on">
     <!-- Personal Information -->
     <div class="form-group">
         <label for="name">Full Name:</label>
@@ -59,81 +59,55 @@
     </div>
 </div>
 
-<!-- JavaScript for Live Preview with Cloudinary Integration -->
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+<!-- JavaScript for Live Preview -->
 <script>
     document.getElementById('project_images').addEventListener('change', function(event) {
         const files = event.target.files;
         const formData = new FormData();
+
         document.getElementById('portfolio-form').dataset.images = ''; // Clear existing images in dataset
 
-        // Using Cloudinary Upload Widget for previewing images
-        const cloudinaryWidget = cloudinary.createUploadWidget({
-            cloudName: 'your-cloud-name', 
-            uploadPreset: 'your-upload-preset',
-            sources: ['local', 'url', 'camera'],
-            showAdvancedOptions: true,
-            cropping: true,
-            multiple: true,
-            maxFiles: 5
-        }, (error, result) => {
-            if (result.event === 'success') {
-                // Display uploaded image preview
-                const imageData = result.info.secure_url; // Get the Cloudinary URL of the uploaded image
-                const previewContainer = document.getElementById('preview-content');
-                
-                // Create an image element to display the preview
-                const imagePreview = document.createElement('img');
-                imagePreview.src = imageData;
-                imagePreview.style.width = '150px';
-                imagePreview.style.margin = '10px';
-                
-                previewContainer.appendChild(imagePreview);
-                
-                // Add the Cloudinary image URL to the form as a hidden input
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'project_images';
-                hiddenInput.value = imageData;
-                document.getElementById('portfolio-form').appendChild(hiddenInput);
-                
-                // Open the modal when an image is uploaded
-                document.getElementById('preview-modal').style.display = 'flex';
-            }
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                // Store the base64 data URL in a hidden input field
+                const imageData = e.target.result;
+                if (!document.getElementById('image-data-' + index)) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'project_images';
+                    hiddenInput.value = imageData;
+                    hiddenInput.id = 'image-data-' + index;
+                    document.getElementById('portfolio-form').appendChild(hiddenInput);
+                }
+            };
+
+            reader.readAsDataURL(file);
         });
-
-        cloudinaryWidget.open();
-    });
-
-    // Close the preview modal when clicking the close button
-    document.getElementById('close-preview').addEventListener('click', function() {
-        document.getElementById('preview-modal').style.display = 'none';
     });
 </script>
+
 
 <!-- Styles for Form and Modal -->
 <style>
     body {
         background-color: #e8f0fe;
         font-family: 'Poppins', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
     }
     h2 {
         text-align: center;
         color: #2b2b2b;
         margin-top: 30px;
+        margin-right: 30px;
     }
     form {
         margin: 20px auto;
         padding: 40px;
+        margin-right: 80px;
         background: #ffffff;
         border-radius: 15px;
         max-width: 800px;
-        width: 100%;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     }
     .form-group {
@@ -177,7 +151,6 @@
         background-color: rgba(0, 0, 0, 0.6);
         justify-content: center;
         align-items: center;
-        z-index: 1000;
     }
     .modal-content {
         background: white;

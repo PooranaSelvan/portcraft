@@ -3,30 +3,12 @@ from flask_pymongo import PyMongo
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import base64
 from bson.objectid import ObjectId
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-from urllib.parse import quote_plus
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = os.urandom(24)
-
-# Encode username and password
-username = quote_plus("portcraft")
-password = quote_plus("karthi@2k25")
-
-# Configure Cloudinary with your credentials
-cloudinary.config(
-    cloud_name="dssvk1cxy", 
-    api_key="885695763567298", 
-    api_secret="NM7qkT3qJxdeBP0HAlhOhQl6k70"
-)
- 
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
-
-app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@portcraft.6b8vl3g.mongodb.net/myDatabase?retryWrites=true&w=majority"
-
+app.config["MONGO_URI"] = "mongodb+srv://user1:sample1@sample.ofxan.mongodb.net/myDatabase"
 mongo = PyMongo(app)
 
 # Home Route
@@ -93,20 +75,16 @@ def create_portfolio():
 
         user_id = ObjectId(session['user_id'])
 
-        # Handle project images - Upload images to Cloudinary
+        # Handle project images
         project_images = []
         if 'project_images' in request.files:
             files = request.files.getlist('project_images')
             for file in files:
-                if file:
-                    # Upload image to Cloudinary
-                    try:
-                        upload_result = cloudinary.uploader.upload(file)
-                        image_url = upload_result['url']  # Get the URL of the uploaded image
-                        project_images.append(image_url)  # Store image URL
-                    except Exception as e:
-                        flash(f"An error occurred while uploading image: {e}", 'error')
-                        return redirect(request.url)  # Redirect back to the form
+                if file and file.filename != '':
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    project_images.append(f'uploads/{filename}')
 
         # Include project_images in the portfolio data
         portfolio_data['project_images'] = project_images
@@ -117,7 +95,7 @@ def create_portfolio():
         })
 
         flash('Portfolio created successfully!', 'success')
-        return redirect(url_for('my-portfolios'))
+        return redirect(url_for('my_portfolios'))
 
     return render_template('create_portfolio.html')
 
@@ -137,6 +115,107 @@ def view_portfolio(username, portfolio_id):
 
     # If the portfolio is not found, return a 404 error
     return "Portfolio not found", 404
+
+# Save Portfolio Route
+@app.route('/save_portfolio', methods=['POST'])
+def save_portfolio():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    name = request.form.get('name')
+    about = request.form.get('about')
+    skills = request.form.get('skills').split(',')
+    contact = request.form.get('contact')
+    social_links = request.form.get('social_links').split(',')
+
+    # Handling project images
+    project_images = []
+    if 'project_images' in request.files:
+        files = request.files.getlist('project_images')
+        for file in files:
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                project_images.append(f'uploads/{filename}')
+
+    # Save data to MongoDB
+    portfolio_data = {
+        'user_id': ObjectId(session['user_id']),
+        'content': {
+            'name': name,
+            'about': about,
+            'skills': skills,
+            'contact': contact,
+            'social_links': social_links,
+            'project_images': project_images
+        }
+    }
+
+    mongo.db.portfolios.insert_one(portfolio_data)
+    flash('Portfolio saved successfully!', 'success')
+    return redirect(url_for('my_portfolios'))
+
+
+# Delete Portfolio Route
+@app.route('/delete_portfolio/<portfolio_id>', methods=['GET', 'POST'])
+def delete_portfolio(portfolio_id):
+    # Check if the portfolio exists
+    portfolio = mongo.db.portfolios.find_one({'_id': ObjectId(portfolio_id)})
+    if portfolio:
+        mongo.db.portfolios.delete_one({'_id': ObjectId(portfolio_id)})
+        print(f"Deleted portfolio with ID: {portfolio_id}")
+        flash('Portfolio deleted successfully!', 'success')
+    else:
+        print(f"No portfolio found with ID: {portfolio_id}")
+        flash('Portfolio not found.', 'error')
+    return redirect(url_for('my_portfolios'))
+
+
+from bson import ObjectId  # Make sure you import ObjectId
+
+# Preview Portfolio Route
+@app.route('/preview-portfolio', methods=['GET', 'POST'])
+def preview_portfolio():
+    if request.method == 'POST':
+        # Fetching form data correctly
+        name = request.form.get('name')
+        about = request.form.get('about')
+        skills = request.form.get('skills')
+        work_experiences = request.form.get('work')
+        contact = request.form.get('contact')
+
+        # Fetching and processing projects and social links
+        projects = request.form.get('projects').split(',') if request.form.get('projects') else []
+        social_links = request.form.get('social_links').split(',') if request.form.get('social_links') else []
+
+        # Handling the project images
+        project_images = []
+        if 'project_images' in request.files:
+            files = request.files.getlist('project_images')
+
+            for file in files:
+                if file:
+                    # Convert file to base64 string
+                    image_data = base64.b64encode(file.read()).decode('utf-8')
+                    # Append the image as a base64 string with prefix
+                    project_images.append(f"data:image/jpeg;base64,{image_data}")
+
+        portfolio_data = {
+            'name': name,
+            'about': about,
+            'skills': skills,
+            'work_experiences': work_experiences,
+            'contact': contact,
+            'projects': projects,
+            'social_links': social_links,
+            'project_images': project_images
+        }
+
+        return render_template('preview.html', portfolio_data=portfolio_data)
+
+    return render_template('create_portfolio.html')
+
 
 # My Portfolios Route
 @app.route('/my-portfolios')
@@ -162,21 +241,6 @@ def edit_portfolio(portfolio_id):
         projects = request.form.get('projects').split(',')
         social_links = request.form.get('social_links').split(',')
 
-        # Handle project images - Upload images to Cloudinary
-        project_images = []
-        if 'project_images' in request.files:
-            files = request.files.getlist('project_images')
-            for file in files:
-                if file:
-                    # Upload image to Cloudinary
-                    try:
-                        upload_result = cloudinary.uploader.upload(file)
-                        image_url = upload_result['url']  # Get the URL of the uploaded image
-                        project_images.append(image_url)  # Store image URL
-                    except Exception as e:
-                        flash(f"An error occurred while uploading image: {e}", 'error')
-                        return redirect(request.url)  # Redirect back to the form
-
         # Update the portfolio in the database
         mongo.db.portfolios.update_one(
             {'_id': ObjectId(portfolio_id)},
@@ -188,8 +252,7 @@ def edit_portfolio(portfolio_id):
                     'contact': contact,
                     'work': work,  # Ensure this line is included
                     'projects': projects,
-                    'social_links': social_links,
-                    'project_images': project_images  # Update images with Cloudinary URLs
+                    'social_links': social_links
                 }
             }}
         )
